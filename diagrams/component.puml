@@ -1,1 +1,28 @@
+@startuml C3_Component
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
+title [C3] Компоненты — Auth Service
+
+Container_Ext(api_gw, "API Gateway", "FastAPI", "Входящие запросы")
+ContainerDb_Ext(db, "PostgreSQL", "БД", "Хранилище данных")
+
+Container_Boundary(auth_svc, "Auth Service") {
+    Component(user_ctrl, "UserController", "FastAPI Router", "Обрабатывает эндпоинты\n/register, /login, /logout")
+    Component(token_ctrl, "TokenController", "FastAPI Router", "Обрабатывает эндпоинты\n/validate, /refresh")
+    Component(auth_logic, "AuthService", "Python class", "Бизнес-логика:\nхеширование паролей,\nпроверка учётных данных")
+    Component(jwt_logic, "JWTService", "Python class", "Генерация и валидация\nJWT, проверка ролей\nи срока действия")
+    Component(user_repo, "UserRepository", "SQLAlchemy", "CRUD-операции\nнад таблицей users")
+    Component(token_repo, "TokenRepository", "SQLAlchemy", "Хранение и проверка\nотозванных токенов")
+}
+
+Rel(api_gw, user_ctrl, "POST /register\nPOST /login\nPOST /logout", "HTTP")
+Rel(api_gw, token_ctrl, "POST /validate\nPOST /refresh", "HTTP")
+Rel(user_ctrl, auth_logic, "Вызывает")
+Rel(token_ctrl, jwt_logic, "Вызывает")
+Rel(auth_logic, jwt_logic, "Запрашивает генерацию токена")
+Rel(auth_logic, user_repo, "Получает/создаёт пользователя")
+Rel(jwt_logic, token_repo, "Проверяет отозванные токены")
+Rel(user_repo, db, "SQL-запросы", "TCP")
+Rel(token_repo, db, "SQL-запросы", "TCP")
+
+@enduml
