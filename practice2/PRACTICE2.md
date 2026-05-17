@@ -77,6 +77,7 @@ Client → API Gateway (8000) → Auth Service (8001) → PostgreSQL (5432)
 
 ## Схема взаимодействия микросервисов
 
+```
 [Client]
     │
     │  POST /auth/register
@@ -96,3 +97,4 @@ Client → API Gateway (8000) → Auth Service (8001) → PostgreSQL (5432)
     │
     ▼
 [PostgreSQL :5432]
+```
