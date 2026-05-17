@@ -1,1 +1,17 @@
+@startuml C1_Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
+title [C1] Контекст — Сервис JWT-аутентификации
+
+Person(dev, "Разработчик / Клиент", "Внешнее приложение или фронтенд,\nзапрашивающее токены")
+Person(admin, "Администратор", "Управляет пользователями\nи ролями через API")
+
+System(jwt_system, "JWT Auth Service", "Выдаёт, валидирует и отзывает\nJWT токены с поддержкой ролей")
+
+System_Ext(postgres, "PostgreSQL", "Внешняя реляционная СУБД\nдля хранения пользователей\nи отозванных токенов")
+
+Rel(dev, jwt_system, "POST /auth/login\nPOST /auth/validate", "HTTPS/REST")
+Rel(admin, jwt_system, "POST /users\nDELETE /users/{id}", "HTTPS/REST")
+Rel(jwt_system, postgres, "Читает и записывает\nданные пользователей", "TCP/SQL")
+
+@enduml
