@@ -1,1 +1,18 @@
+@startuml C2_Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
+title [C2] Контейнеры — Сервис JWT-аутентификации
+
+Person(client, "Клиент / Фронтенд", "Внешнее приложение")
+
+System_Boundary(jwt_system, "JWT Auth Service") {
+    Container(api_gw, "API Gateway", "Python / FastAPI", "Принимает HTTP-запросы,\nмаршрутизирует к сервисам,\nвалидирует входные данные")
+    Container(auth_svc, "Auth Service", "Python / FastAPI", "Бизнес-логика: регистрация,\nвыдача и отзыв токенов,\nхеширование паролей")
+    ContainerDb(db, "PostgreSQL", "База данных", "Хранит пользователей,\nроли и отозванные токены")
+}
+
+Rel(client, api_gw, "POST /auth/login\nPOST /auth/validate\nPOST /auth/logout", "HTTPS/REST")
+Rel(api_gw, auth_svc, "Проксирует запросы", "HTTP/REST")
+Rel(auth_svc, db, "Читает/записывает\nпользователей и токены", "TCP/SQL")
+
+@enduml
