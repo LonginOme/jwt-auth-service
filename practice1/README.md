@@ -13,7 +13,7 @@ access- и refresh-токенов, валидация токенов с пров
 
 ## Диаграммы
 
-### C1 — Контекст
+### C1 - Контекст
 ![context](diagrams/context.png)
 [Исходный код](diagrams/context.puml)
 
@@ -23,7 +23,7 @@ access- и refresh-токенов, валидация токенов с пров
 | Подписи на стрелках | Абстрактные "uses" | Заменены на конкретные эндпоинты | Повышает читаемость |
 | Роли пользователей | Один общий "User" | Разделён на Developer и Admin | Отражает реальные роли |
 
-### C2 — Контейнеры
+### C2 - Контейнеры
 ![container](diagrams/container.png)
 [Исходный код](diagrams/container.puml)
 
@@ -33,7 +33,7 @@ access- и refresh-токенов, валидация токенов с пров
 | Границы системы | Не было System_Boundary | Добавлен System_Boundary | Требование нотации C4 |
 | Связи | Однонаправленные без подписей | Добавлены протоколы (HTTP, TCP/SQL) | Уточняет способ взаимодействия |
 
-### C3 — Компоненты (Auth Service)
+### C3 - Компоненты (Auth Service)
 ![component](diagrams/component.png)
 [Исходный код](diagrams/component.puml)
 
