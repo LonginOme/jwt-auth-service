@@ -23,8 +23,7 @@ Client → API Gateway (8000) → Auth Service (8001) → PostgreSQL (5432)
 
 ## Использованные ИИ-инструменты
 
-- **Claude (claude.ai)** - генерация скелета микросервисов, кода FastAPI эндпоинтов,
-  структуры БД, docker-compose конфига и автотестов.
+- **Claude (claude.ai)** - генерация скелетов для микросервисов, docker-compose конфига и автотестов.
 
 ---
 
