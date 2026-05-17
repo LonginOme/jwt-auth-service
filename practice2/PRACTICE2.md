@@ -44,12 +44,12 @@ Client → API Gateway (8000) → Auth Service (8001) → PostgreSQL (5432)
 
 | Компонент | % написан ИИ | % написан вручную |
 |---|---|---|
-| auth_service/main.py | 90% | 10% |
-| auth_service/database.py | 90% | 10% |
-| auth_service/models.py | 95% | 5% |
-| api_gateway/main.py | 90% | 10% |
-| docker-compose.yml | 85% | 15% |
-| tests/test_auth.py | 90% | 10% |
+| auth_service/main.py | 60% | 40% |
+| auth_service/database.py | 50% | 50% |
+| auth_service/models.py | 25% | 75% |
+| api_gateway/main.py | 30% | 70% |
+| docker-compose.yml | 15% | 85% |
+| tests/test_auth.py | 10% | 90% |
 
 ---
 
