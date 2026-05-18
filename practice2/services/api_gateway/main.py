@@ -4,6 +4,14 @@ import httpx
 import os
 
 app = FastAPI(title="API Gateway")
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth_service:8001")
 
 class RegisterRequest(BaseModel):

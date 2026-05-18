@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>JWT Auth Service</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; padding: 30px; }
+    h1 { text-align: center; margin-bottom: 8px; color: #4fc3f7; font-size: 28px; }
+    .subtitle { text-align: center; color: #888; margin-bottom: 30px; font-size: 14px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 900px; margin: 0 auto; }
+    .card { background: #16213e; border-radius: 12px; padding: 24px; border: 1px solid #0f3460; }
+    .card h2 { font-size: 16px; margin-bottom: 16px; color: #4fc3f7; display: flex; align-items: center; gap: 8px; }
+    input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #0f3460;
+            background: #0f3460; color: #eee; font-size: 14px; margin-bottom: 10px; }
+    input:focus { outline: none; border-color: #4fc3f7; }
+    button { width: 100%; padding: 11px; border-radius: 8px; border: none; cursor: pointer;
+             background: #4fc3f7; color: #1a1a2e; font-size: 14px; font-weight: bold;
+             transition: background 0.2s; }
+    button:hover { background: #81d4fa; }
+    .result { margin-top: 14px; padding: 12px; border-radius: 8px; font-size: 13px;
+              font-family: monospace; min-height: 48px; word-break: break-all;
+              background: #0a1628; border: 1px solid #0f3460; color: #a5d6a7; }
+    .result.error { color: #ef9a9a; }
+    .token-area { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #0f3460;
+                  background: #0f3460; color: #eee; font-size: 12px; margin-bottom: 10px;
+                  font-family: monospace; resize: vertical; min-height: 80px; }
+    select { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #0f3460;
+             background: #0f3460; color: #eee; font-size: 14px; margin-bottom: 10px; }
+    .status-bar { max-width: 900px; margin: 0 auto 20px; padding: 10px 16px;
+                  background: #16213e; border-radius: 8px; border: 1px solid #0f3460;
+                  font-size: 13px; display: flex; align-items: center; gap: 10px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: #4caf50; }
+    .dot.red { background: #f44336; }
+  </style>
+</head>
+<body>
+
+<h1>🔐 JWT Auth Service</h1>
+<p class="subtitle">Сервис генерации и валидации JWT токенов с ролями | Тема 19 | ИКМО-06-25</p>
+
+<div class="status-bar">
+  <div class="dot" id="statusDot"></div>
+  <span id="statusText">Проверка подключения...</span>
+</div>
+
+<div class="grid">
+
+  <!-- Регистрация -->
+  <div class="card">
+    <h2>👤 Регистрация</h2>
+    <input id="reg-username" type="text" placeholder="Имя пользователя">
+    <input id="reg-password" type="password" placeholder="Пароль">
+    <select id="reg-role">
+      <option value="user">user</option>
+      <option value="admin">admin</option>
+      <option value="moderator">moderator</option>
+    </select>
+    <button onclick="register()">Зарегистрировать</button>
+    <div class="result" id="reg-result">Результат появится здесь...</div>
+  </div>
+
+  <!-- Логин -->
+  <div class="card">
+    <h2>🔑 Вход</h2>
+    <input id="login-username" type="text" placeholder="Имя пользователя">
+    <input id="login-password" type="password" placeholder="Пароль">
+    <button onclick="login()">Войти</button>
+    <div class="result" id="login-result">Результат появится здесь...</div>
+  </div>
+
+  <!-- Валидация -->
+  <div class="card">
+    <h2>✅ Валидация токена</h2>
+    <textarea class="token-area" id="validate-token" placeholder="Вставьте JWT токен..."></textarea>
+    <button onclick="validate()">Проверить токен</button>
+    <div class="result" id="validate-result">Результат появится здесь...</div>
+  </div>
+
+  <!-- Logout -->
+  <div class="card">
+    <h2>🚪 Выход (отзыв токена)</h2>
+    <textarea class="token-area" id="logout-token" placeholder="Вставьте JWT токен..."></textarea>
+    <button onclick="logout()" style="background:#ef9a9a;">Отозвать токен</button>
+    <div class="result" id="logout-result">Результат появится здесь...</div>
+  </div>
+
+</div>
+
+<script>
+  const API = 'http://localhost:8000';
+
+  async function checkHealth() {
+    try {
+      const r = await fetch(API + '/health');
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('statusText');
+      if (r.ok) {
+        dot.className = 'dot';
+        text.textContent = 'API Gateway подключён — сервис работает';
+      } else {
+        throw new Error();
+      }
+    } catch {
+      document.getElementById('statusDot').className = 'dot red';
+      document.getElementById('statusText').textContent = 'Нет подключения к API Gateway';
+    }
+  }
+
+  function show(id, data, isError = false) {
+    const el = document.getElementById(id);
+    el.textContent = JSON.stringify(data, null, 2);
+    el.className = isError ? 'result error' : 'result';
+  }
+
+  async function register() {
+    try {
+      const r = await fetch(API + '/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('reg-username').value,
+          password: document.getElementById('reg-password').value,
+          role: document.getElementById('reg-role').value
+        })
+      });
+      const data = await r.json();
+      show('reg-result', data, !r.ok);
+    } catch(e) {
+      show('reg-result', { error: e.message }, true);
+    }
+  }
+
+  async function login() {
+    try {
+      const r = await fetch(API + '/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('login-username').value,
+          password: document.getElementById('login-password').value
+        })
+      });
+      const data = await r.json();
+      show('login-result', data, !r.ok);
+      if (data.access_token) {
+        document.getElementById('validate-token').value = data.access_token;
+        document.getElementById('logout-token').value = data.access_token;
+      }
+    } catch(e) {
+      show('login-result', { error: e.message }, true);
+    }
+  }
+
+  async function validate() {
+    try {
+      const r = await fetch(API + '/auth/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: document.getElementById('validate-token').value })
+      });
+      const data = await r.json();
+      show('validate-result', data, !r.ok);
+    } catch(e) {
+      show('validate-result', { error: e.message }, true);
+    }
+  }
+
+  async function logout() {
+    try {
+      const r = await fetch(API + '/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: document.getElementById('logout-token').value })
+      });
+      const data = await r.json();
+      show('logout-result', data, !r.ok);
+    } catch(e) {
+      show('logout-result', { error: e.message }, true);
+    }
+  }
+
+  checkHealth();
+  setInterval(checkHealth, 5000);
+</script>
+
+</body>
+</html>
